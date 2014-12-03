@@ -128,7 +128,7 @@
 
     // trigger success response
     [self success];
-
+/*
     // show "open pdf with ..." menu
     NSURL* url = [NSURL fileURLWithPath:filePath];
     self.documentController = [UIDocumentInteractionController interactionControllerWithURL:url];
@@ -148,7 +148,7 @@
         [alertView show];
         //[alertView release]; // p. leak
     }
-
+*/
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
