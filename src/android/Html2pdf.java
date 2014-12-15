@@ -277,34 +277,34 @@ public class Html2pdf extends CordovaPlugin
 	                        
 	                        // start the pdf viewer app (trigger the pdf view intent)
 		                    PluginResult result;
-		                    boolean success = false; 
-		                    if( self.canHandleIntent(self.cordova.getActivity(), pdfViewIntent) )
-		                    {
-			                    try
-			                    {
-			                    	self.cordova.startActivityForResult(self, pdfViewIntent, 0);
-				                    success = true;
-			                    }
-			                    catch( ActivityNotFoundException e )
-			                    {
-			                    	success = false;
-			                    }
-		                    }
-		                    if( success )
-		                    {
-		                    	// send success result to cordova
+		                    //boolean success = false; 
+		                    //if( self.canHandleIntent(self.cordova.getActivity(), pdfViewIntent) )
+		                    //{
+			                  //  try
+			                  //  {
+			                  //  	self.cordova.startActivityForResult(self, pdfViewIntent, 0);
+				                //    success = true;
+			                  //  }
+			                  //  catch( ActivityNotFoundException e )
+			                  //  {
+			                  //  	success = false;
+			                  //  }
+		                    //}
+		                    //if( success )
+		                    //{
+		                    // send success result to cordova
 				                result = new PluginResult(PluginResult.Status.OK);
 				                result.setKeepCallback(false); 
-			                    self.callbackContext.sendPluginResult(result);
-		                    }
-		                    else
-		                    {
-		                    	// send error
-		                        result = new PluginResult(PluginResult.Status.ERROR, "activity_not_found");
-		                        result.setKeepCallback(false);
-		                        self.callbackContext.sendPluginResult(result);
-		                    }
-                        }
+			                  self.callbackContext.sendPluginResult(result);
+		                    //}
+		                    //else
+		                    //{
+		                    //	// send error
+		                    //    result = new PluginResult(PluginResult.Status.ERROR, "activity_not_found");
+		                    //    result.setKeepCallback(false);
+		                    //    self.callbackContext.sendPluginResult(result);
+		                    //}
+                      }
                   }
                 }, 500);
             }
