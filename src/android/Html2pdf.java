@@ -36,7 +36,7 @@ import android.os.Handler;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintManager;
-import android.printservice.PrintJob;
+//import android.printservice.PrintJob;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -44,6 +44,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.util.Log;
+import android.print.pdf.PrintedPdfDocument;
+import android.print.PrintJob;
 
 @TargetApi(19)
 public class Html2pdf extends CordovaPlugin
@@ -81,105 +83,103 @@ public class Html2pdf extends CordovaPlugin
 					Log.v(LOG_TAG, "Html end:" + args.getString(0).substring(args.getString(0).length() - 30));
 				}
 				
-				if( args.getString(1) != null && args.getString(1) != "null" )
-					this.tmpPdfName = args.getString(1);  
-				
+				if( args.getString(1) != null && args.getString(1) != "null" ){
+					this.tmpPdfName = args.getString(1);
+				}
+					
 				final Html2pdf self = this;
 				final String content = args.optString(0, "<html></html>");
-		        this.callbackContext = callbackContext;
+		    this.callbackContext = callbackContext;
 				
-		        cordova.getActivity().runOnUiThread( new Runnable() {
-		            public void run()
+		    cordova.getActivity().runOnUiThread( new Runnable() {
+		    	public void run()
 					{
-		            	if( Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT ) // Android 4.4
-		            	{
-		            		/*
-			            	 * None-Kitkat pdf creation (Android < 4.4)
-			            	 */
-		            		
-			                self.loadContentIntoWebView(content);
-		            	}
-		            	else
-		            	{
-			            	/*
-			            	 * Kitkat pdf creation by using the android print framework (Android >= 4.4)
-			            	 */
+		        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT ) // Android 4.4
+          	{
+          		/*
+            	 * None-Kitkat pdf creation (Android < 4.4)
+            	 */
+          		
+                self.loadContentIntoWebView(content);
+          	}
+          	else
+          	{
+            	/*
+            	 * Kitkat pdf creation by using the android print framework (Android >= 4.4)
+            	 */
 		            		
 							// Create a WebView object specifically for printing
 							WebView page = new WebView(cordova.getActivity());
 							page.getSettings().setJavaScriptEnabled(false);
 							page.setDrawingCacheEnabled(true);
-					        // Auto-scale the content to the webview's width.
+					    // Auto-scale the content to the webview's width.
 							page.getSettings().setLoadWithOverviewMode(true);
 							page.getSettings().setUseWideViewPort(true);
 							page.setInitialScale(0);
-					        // Disable android text auto fit behaviour
+					    // Disable android text auto fit behaviour
 							page.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
-		            		if( showWebViewForDebugging )
-	            	        {
-		            			page.setVisibility(View.VISIBLE);
-	            	        } else {
-	            	        	page.setVisibility(View.INVISIBLE);
-	            	        }
+          		if( showWebViewForDebugging ){
+          			page.setVisibility(View.VISIBLE);
+        	    } else {
+        	      page.setVisibility(View.INVISIBLE);
+        	    }
 		            		
 							// self.cordova.getActivity().addContentView(webView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-		            		page.setWebViewClient( new WebViewClient()
-							{
-									public boolean shouldOverrideUrlLoading(WebView view, String url) {
-										return false;
-									}
+		          page.setWebViewClient( new WebViewClient()
+		          {
+								public boolean shouldOverrideUrlLoading(WebView view, String url) {
+									return false;
+								}
 			
-									@Override
-									public void onPageFinished(WebView view, String url)
-									{
-										
-										// Get a PrintManager instance
-										PrintManager printManager = (PrintManager) self.cordova.getActivity()
-												.getSystemService(Context.PRINT_SERVICE);
-			
-										// Get a print adapter instance
-										PrintDocumentAdapter printAdapter = view.createPrintDocumentAdapter();
-										
-						                // Get a print builder attributes instance
-						                PrintAttributes.Builder builder = new PrintAttributes.Builder();
-						                builder.setMinMargins(PrintAttributes.Margins.NO_MARGINS);
-						                // builder.setMediaSize(PrintAttributes.MediaSize.ISO_A4);
-						                // builder.setColorMode(PrintAttributes.COLOR_MODE_COLOR);
-						                // builder.setResolution(new PrintAttributes.Resolution("default", self.tmpPdfName, 600, 600));
+								@Override
+								public void onPageFinished(WebView view, String url){
+									// Get a PrintManager instance
+									PrintManager printManager = (PrintManager) self.cordova.getActivity()
+											.getSystemService(Context.PRINT_SERVICE);
+		
+									// Get a print adapter instance
+									PrintDocumentAdapter printAdapter = view.createPrintDocumentAdapter();
+									
+	                // Get a print builder attributes instance
+	                PrintAttributes.Builder builder = new PrintAttributes.Builder();
+	                builder.setMinMargins(PrintAttributes.Margins.NO_MARGINS);
+	                //builder.setMediaSize(PrintAttributes.MediaSize.ISO_A4);
+	                //builder.setColorMode(PrintAttributes.COLOR_MODE_COLOR);
+	                //builder.setResolution(new PrintAttributes.Resolution("default", self.tmpPdfName, 600, 600));
+	                
+	                // send success result to cordova
+	                PluginResult result = new PluginResult(PluginResult.Status.OK);
+	                result.setKeepCallback(false); 
+                  self.callbackContext.sendPluginResult(result);
 						                
-						                // send success result to cordova
-						                PluginResult result = new PluginResult(PluginResult.Status.OK);
-						                result.setKeepCallback(false); 
-					                    self.callbackContext.sendPluginResult(result);
-						                
-						                // Create & send a print job
-					                    File filePdf = new File(self.tmpPdfName);
-										printManager.print(filePdf.getName(), printAdapter, builder.build());
-										
-										
-										
-									}
+	                // Create & send a print job
+                  File filePdf = new File(self.tmpPdfName);
+									printManager.print(filePdf.getName(), printAdapter, builder.build());
+
+									
+								}
 							});
 							
 							// Reverse engineer base url (assets/www) from the cordova webView url
-					        String baseURL = self.webView.getUrl();
-					        baseURL        = baseURL.substring(0, baseURL.lastIndexOf('/') + 1);
-					        
-					        // Load content into the print webview
-					        if( showWebViewForDebugging )
-	            	        {
-					        	cordova.getActivity().addContentView(page, new ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-	            	        }
-				            page.loadDataWithBaseURL(baseURL, content, "text/html", "utf-8", null);
-		            	}
-		            }
-		        });
+			        String baseURL = self.webView.getUrl();
+			        baseURL        = baseURL.substring(0, baseURL.lastIndexOf('/') + 1);
+			        
+			        // Load content into the print webview
+			        if( showWebViewForDebugging ){
+			        	cordova.getActivity().addContentView(page, new ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+          	  }
+
+	            page.loadDataWithBaseURL(baseURL, content, "text/html", "utf-8", null);
+
+		        }
+		      }
+		    });
 
 		        
-		        // send "no-result" result to delay result handling
-		        PluginResult pluginResult = new  PluginResult(PluginResult.Status.NO_RESULT); 
-		        pluginResult.setKeepCallback(true); 
-		        callbackContext.sendPluginResult(pluginResult);
+        // send "no-result" result to delay result handling
+        PluginResult pluginResult = new  PluginResult(PluginResult.Status.NO_RESULT); 
+        pluginResult.setKeepCallback(true); 
+        callbackContext.sendPluginResult(pluginResult);
 		        
 				return true;
 			}
@@ -275,7 +275,7 @@ public class Html2pdf extends CordovaPlugin
 	                    		}
                     		);
 	                        
-	                        // start the pdf viewer app (trigger the pdf view intent)
+	                      // start the pdf viewer app (trigger the pdf view intent)
 		                    PluginResult result;
 		                    //boolean success = false; 
 		                    //if( self.canHandleIntent(self.cordova.getActivity(), pdfViewIntent) )
