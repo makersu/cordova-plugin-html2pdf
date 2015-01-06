@@ -94,7 +94,7 @@ public class Html2pdf extends CordovaPlugin
 		    cordova.getActivity().runOnUiThread( new Runnable() {
 		    	public void run()
 					{
-		        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT ) // Android 4.4
+		        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) // Android 4.4
           	{
           		/*
             	 * None-Kitkat pdf creation (Android < 4.4)
@@ -427,7 +427,7 @@ public class Html2pdf extends CordovaPlugin
             	Log.v(LOG_TAG, "Creating page nr. " + currPageCount );
             	
             	// slice bitmap
-            	currPage = Bitmap.createBitmap(screenshot, 0, currPos, sliceWidth, (int) Math.min( sliceHeight, totalSize - currPos ));
+            	currPage = Bitmap.createBitmap(screenshot, 0, currPos, 850, (int) Math.min( sliceHeight, totalSize - currPos ));
             	
             	// save page as png
             	stream = new FileOutputStream( new File(dir, "pdf-page-"+currPageCount+".png") );
