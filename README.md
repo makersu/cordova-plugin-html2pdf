@@ -1,3 +1,46 @@
+## User Guide for Android by Maker Su
+### add plugin
+```
+cordova plugin add https://github.com/makersu/makersu-cordova-plugin-html2pdf.git
+```
+### copy itextpdf-5.5.4.jar
+```
+cp itextpdf-5.5.4.jar platforms/android/libs/
+```
+### angularjs usage example
+```
+var saveFilename = 'xxx.pdf';
+var savePath = device.platform == 'iOS' ? "~/Library/NoCloud/"+saveFilename : saveFilename;
+var pdfPath = device.platform == 'iOS' ? cordova.file.dataDirectory+saveFilename : cordova.file.externalRootDirectory+saveFilename;
+...
+$scope.createAndDisplayPDF = function(filename) {
+            $scope.showLoading();
+
+            var success = function(status) {
+                $scope.hideLoading();
+                $state.go($state.$current, null, { reload: true });
+                $scope.displayPDFFile(pdfPath); 
+            };
+
+            var error = function(status) {
+                console.log(status);
+            };
+
+            $timeout(function() {
+                var target=convert4PdfHtml()
+                
+                window.html2pdf.create(
+                    angular.element(target).html(),
+                    savePath,
+                    success,
+                    error
+                );
+            }, 200);
+
+        }
+
+```
+
 Html 2 Pdf
 =============
 
@@ -48,46 +91,5 @@ function onDeviceReady()
         );
 }
 ```
-## User Guide for Android by Maker Su
-### add plugin
-```
-cordova plugin add https://github.com/makersu/makersu-cordova-plugin-html2pdf.git
-```
-### copy itextpdf-5.5.4.jar
-```
-cp itextpdf-5.5.4.jar platforms/android/libs/
-```
-### angularjs usage example
-```
-var saveFilename = 'xxx.pdf';
-var savePath = device.platform == 'iOS' ? "~/Library/NoCloud/"+saveFilename : saveFilename;
-var pdfPath = device.platform == 'iOS' ? cordova.file.dataDirectory+saveFilename : cordova.file.externalRootDirectory+saveFilename;
-...
-$scope.createAndDisplayPDF = function(filename) {
-            $scope.showLoading();
 
-            var success = function(status) {
-                $scope.hideLoading();
-                $state.go($state.$current, null, { reload: true });
-                $scope.displayPDFFile(pdfPath); 
-            };
-
-            var error = function(status) {
-                console.log(status);
-            };
-
-            $timeout(function() {
-                var target=convert4PdfHtml()
-                
-                window.html2pdf.create(
-                    angular.element(target).html(),
-                    savePath,
-                    success,
-                    error
-                );
-            }, 200);
-
-        }
-
-```
 
