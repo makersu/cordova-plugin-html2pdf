@@ -51,7 +51,7 @@ function onDeviceReady()
 ## User Guide for Android by Maker Su
 ### add plugin
 ```
-cordova plugin add 
+cordova plugin add https://github.com/makersu/makersu-cordova-plugin-html2pdf.git
 ```
 ### copy itextpdf-5.5.4.jar
 ```
