@@ -5,7 +5,7 @@ cordova plugin add https://github.com/makersu/makersu-cordova-plugin-html2pdf.gi
 ```
 ### copy itextpdf-5.5.4.jar
 ```
-cp itextpdf-5.5.4.jar platforms/android/libs/
+cp plugins/at.modalog.cordova.plugin.html2pdf/itextpdf-5.5.4.jar platforms/android/libs/
 ```
 ### angularjs usage example
 ```
