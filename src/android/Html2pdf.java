@@ -11,12 +11,12 @@ import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Element;
-import com.lowagie.text.Image;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.pdf.PdfWriter;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import android.R.bool;
 import android.annotation.TargetApi;
@@ -33,19 +33,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import android.print.PrintAttributes;
-import android.print.PrintDocumentAdapter;
-import android.print.PrintManager;
-//import android.printservice.PrintJob;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.view.Display;
 import android.webkit.WebViewClient;
 import android.util.Log;
-import android.print.pdf.PrintedPdfDocument;
-import android.print.PrintJob;
 
 @TargetApi(19)
 public class Html2pdf extends CordovaPlugin
@@ -83,103 +79,22 @@ public class Html2pdf extends CordovaPlugin
 					Log.v(LOG_TAG, "Html end:" + args.getString(0).substring(args.getString(0).length() - 30));
 				}
 				
-				if( args.getString(1) != null && args.getString(1) != "null" ){
-					this.tmpPdfName = args.getString(1);
-				}
-					
+				if( args.getString(1) != null && args.getString(1) != "null" )
+					this.tmpPdfName = args.getString(1);  
+				
 				final Html2pdf self = this;
 				final String content = args.optString(0, "<html></html>");
-		    this.callbackContext = callbackContext;
-				
-		    cordova.getActivity().runOnUiThread( new Runnable() {
-		    	public void run()
-					{
-		        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) // Android 4.4
-          	{
-          		/*
-            	 * None-Kitkat pdf creation (Android < 4.4)
-            	 */
-          		
-                self.loadContentIntoWebView(content);
-          	}
-          	else
-          	{
-            	/*
-            	 * Kitkat pdf creation by using the android print framework (Android >= 4.4)
-            	 */
-		            		
-							// Create a WebView object specifically for printing
-							WebView page = new WebView(cordova.getActivity());
-							page.getSettings().setJavaScriptEnabled(false);
-							page.setDrawingCacheEnabled(true);
-					    // Auto-scale the content to the webview's width.
-							page.getSettings().setLoadWithOverviewMode(true);
-							page.getSettings().setUseWideViewPort(true);
-							page.setInitialScale(0);
-					    // Disable android text auto fit behaviour
-							page.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
-          		if( showWebViewForDebugging ){
-          			page.setVisibility(View.VISIBLE);
-        	    } else {
-        	      page.setVisibility(View.INVISIBLE);
-        	    }
-		            		
-							// self.cordova.getActivity().addContentView(webView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-		          page.setWebViewClient( new WebViewClient()
-		          {
-								public boolean shouldOverrideUrlLoading(WebView view, String url) {
-									return false;
-								}
-			
-								@Override
-								public void onPageFinished(WebView view, String url){
-									// Get a PrintManager instance
-									PrintManager printManager = (PrintManager) self.cordova.getActivity()
-											.getSystemService(Context.PRINT_SERVICE);
-		
-									// Get a print adapter instance
-									PrintDocumentAdapter printAdapter = view.createPrintDocumentAdapter();
-									
-	                // Get a print builder attributes instance
-	                PrintAttributes.Builder builder = new PrintAttributes.Builder();
-	                builder.setMinMargins(PrintAttributes.Margins.NO_MARGINS);
-	                //builder.setMediaSize(PrintAttributes.MediaSize.ISO_A4);
-	                //builder.setColorMode(PrintAttributes.COLOR_MODE_COLOR);
-	                //builder.setResolution(new PrintAttributes.Resolution("default", self.tmpPdfName, 600, 600));
-	                
-	                // send success result to cordova
-	                PluginResult result = new PluginResult(PluginResult.Status.OK);
-	                result.setKeepCallback(false); 
-                  self.callbackContext.sendPluginResult(result);
-						                
-	                // Create & send a print job
-                  File filePdf = new File(self.tmpPdfName);
-									printManager.print(filePdf.getName(), printAdapter, builder.build());
-
-									
-								}
-							});
-							
-							// Reverse engineer base url (assets/www) from the cordova webView url
-			        String baseURL = self.webView.getUrl();
-			        baseURL        = baseURL.substring(0, baseURL.lastIndexOf('/') + 1);
-			        
-			        // Load content into the print webview
-			        if( showWebViewForDebugging ){
-			        	cordova.getActivity().addContentView(page, new ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-          	  }
-
-	            page.loadDataWithBaseURL(baseURL, content, "text/html", "utf-8", null);
-
-		        }
-		      }
-		    });
-
+                this.callbackContext = callbackContext;
+				cordova.getActivity().runOnUiThread( new Runnable() {
+                    public void run(){
+                        self.loadContentIntoWebView(content);
+                    }
+                });
 		        
-        // send "no-result" result to delay result handling
-        PluginResult pluginResult = new  PluginResult(PluginResult.Status.NO_RESULT); 
-        pluginResult.setKeepCallback(true); 
-        callbackContext.sendPluginResult(pluginResult);
+                // send "no-result" result to delay result handling
+                PluginResult pluginResult = new  PluginResult(PluginResult.Status.NO_RESULT); 
+                pluginResult.setKeepCallback(true); 
+                callbackContext.sendPluginResult(pluginResult);
 		        
 				return true;
 			}
@@ -275,36 +190,37 @@ public class Html2pdf extends CordovaPlugin
 	                    		}
                     		);
 	                        
-	                      // start the pdf viewer app (trigger the pdf view intent)
+	                        // start the pdf viewer app (trigger the pdf view intent)
 		                    PluginResult result;
-		                    //boolean success = false; 
-		                    //if( self.canHandleIntent(self.cordova.getActivity(), pdfViewIntent) )
-		                    //{
-			                  //  try
-			                  //  {
-			                  //  	self.cordova.startActivityForResult(self, pdfViewIntent, 0);
-				                //    success = true;
-			                  //  }
-			                  //  catch( ActivityNotFoundException e )
-			                  //  {
-			                  //  	success = false;
-			                  //  }
-		                    //}
-		                    //if( success )
-		                    //{
-		                    // send success result to cordova
+		                    boolean success = false; 
+		                    if( self.canHandleIntent(self.cordova.getActivity(), pdfViewIntent) )
+		                    {
+			                    try
+			                    {
+			                    	self.cordova.startActivityForResult(self, pdfViewIntent, 0);
+				                    success = true;
+			                    }
+			                    catch( ActivityNotFoundException e )
+			                    {
+			                    	success = false;
+			                    }
+		                    }
+
+		                    if( success )
+		                    {
+		                    	// send success result to cordova
 				                result = new PluginResult(PluginResult.Status.OK);
 				                result.setKeepCallback(false); 
-			                  self.callbackContext.sendPluginResult(result);
-		                    //}
-		                    //else
-		                    //{
-		                    //	// send error
-		                    //    result = new PluginResult(PluginResult.Status.ERROR, "activity_not_found");
-		                    //    result.setKeepCallback(false);
-		                    //    self.callbackContext.sendPluginResult(result);
-		                    //}
-                      }
+			                    self.callbackContext.sendPluginResult(result);
+		                    }
+		                    else
+		                    {
+		                    	// send error
+		                        result = new PluginResult(PluginResult.Status.ERROR, "activity_not_found");
+		                        result.setKeepCallback(false);
+		                        self.callbackContext.sendPluginResult(result);
+		                    }
+                        }
                   }
                 }, 500);
             }
@@ -411,27 +327,48 @@ public class Html2pdf extends CordovaPlugin
             }
             
             double pageWidth  = PageSize.A4.getWidth()  * 0.85; // width of the image is 85% of the page
+            //Log.v(LOG_TAG, "pageWidth=" + pageWidth );//
             double pageHeight = PageSize.A4.getHeight() * 0.80; // max height of the image is 80% of the page
+            //Log.v(LOG_TAG, "pageHeight=" + pageHeight );//
             double pageHeightToWithRelation = pageHeight / pageWidth; // e.g.: 1.33 (4/3)
+            //Log.v(LOG_TAG, "pageHeightToWithRelation=" + pageHeightToWithRelation );//
             
             Bitmap currPage;
             int totalSize  = screenshot.getHeight();
+            //Log.v(LOG_TAG, "totalSize=" + totalSize );//
+
             int currPos = 0;
             int currPageCount = 0;
+
+            int ssWidth=screenshot.getWidth() ;//
+            int ssHeight=screenshot.getHeight();//
+            //Log.v(LOG_TAG, "ssWidth=" + ssWidth);//
+            //Log.v(LOG_TAG, "ssHeight=" + ssHeight);//
+
             int sliceWidth = screenshot.getWidth();
+            //Log.v(LOG_TAG, "sliceWidth=" + sliceWidth );//
             int sliceHeight = (int) Math.round(sliceWidth * pageHeightToWithRelation);
+            //Log.v(LOG_TAG, "sliceHeight=" + sliceHeight );//
+
             while( totalSize > currPos && currPageCount < 100  ) // max 100 pages
             {
             	currPageCount++;
             	
             	Log.v(LOG_TAG, "Creating page nr. " + currPageCount );
             	
-            	// slice bitmap
-            	currPage = Bitmap.createBitmap(screenshot, 0, currPos, 850, (int) Math.min( sliceHeight, totalSize - currPos ));
-            	
+            	WindowManager wm = (WindowManager) cordova.getActivity()
+												.getSystemService(Context.WINDOW_SERVICE);
+				
+                Display display = wm.getDefaultDisplay(); 
+				//Log.v(LOG_TAG, "display.getWidth()=" + display.getWidth());//
+				//Log.v(LOG_TAG, "display.getHeight()=" + display.getHeight());//
+
+				currPage = Bitmap.createBitmap(screenshot, 0, currPos, 850, ssHeight);//
+								
             	// save page as png
             	stream = new FileOutputStream( new File(dir, "pdf-page-"+currPageCount+".png") );
             	currPage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
                 stream.close();
                 
                 // move current position indicator
@@ -455,7 +392,8 @@ public class Html2pdf extends CordovaPlugin
             {
             	file = new File(dir, "pdf-page-"+i+".png");
             	Image image = Image.getInstance (file.getAbsolutePath());
-                image.scaleToFit( (float)pageWidth, 9999);
+              
+                image.scaleToFit( (float)PageSize.A4.getWidth(), (float)PageSize.A4.getHeight());
             	image.setAlignment(Element.ALIGN_CENTER);
             	document.add(image);
             	document.newPage();
