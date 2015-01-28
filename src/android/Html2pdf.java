@@ -335,20 +335,20 @@ public class Html2pdf extends CordovaPlugin
             
             Bitmap currPage;
             int totalSize  = screenshot.getHeight();
-            //Log.v(LOG_TAG, "totalSize=" + totalSize );//
+            Log.v(LOG_TAG, "totalSize=" + totalSize );//
 
             int currPos = 0;
             int currPageCount = 0;
 
-            int ssWidth=screenshot.getWidth() ;//
-            int ssHeight=screenshot.getHeight();//
-            //Log.v(LOG_TAG, "ssWidth=" + ssWidth);//
-            //Log.v(LOG_TAG, "ssHeight=" + ssHeight);//
+            int screenshotWidth=screenshot.getWidth() ;//
+            int screenshotHeight=screenshot.getHeight();//
+            Log.v(LOG_TAG, "screenshotWidth=" + screenshotWidth);//
+            Log.v(LOG_TAG, "screenshotHeight=" + screenshotHeight);//
 
             int sliceWidth = screenshot.getWidth();
-            //Log.v(LOG_TAG, "sliceWidth=" + sliceWidth );//
+            Log.v(LOG_TAG, "sliceWidth=" + sliceWidth );//
             int sliceHeight = (int) Math.round(sliceWidth * pageHeightToWithRelation);
-            //Log.v(LOG_TAG, "sliceHeight=" + sliceHeight );//
+            Log.v(LOG_TAG, "sliceHeight=" + sliceHeight );//
 
             while( totalSize > currPos && currPageCount < 100  ) // max 100 pages
             {
@@ -356,23 +356,19 @@ public class Html2pdf extends CordovaPlugin
             	
             	Log.v(LOG_TAG, "Creating page nr. " + currPageCount );
             	
-            	WindowManager wm = (WindowManager) cordova.getActivity()
-												.getSystemService(Context.WINDOW_SERVICE);
-				
-                Display display = wm.getDefaultDisplay(); 
-				//Log.v(LOG_TAG, "display.getWidth()=" + display.getWidth());//
-				//Log.v(LOG_TAG, "display.getHeight()=" + display.getHeight());//
-
-				currPage = Bitmap.createBitmap(screenshot, 0, currPos, 850, ssHeight);//
+                //Log.v(LOG_TAG, "createBitmap w=" + screenshotWidth);//
+                //Log.v(LOG_TAG, "createBitmap h=" + screenshotHeight);//
+                //currPage = Bitmap.createBitmap(screenshot, 0, currPos, sliceWidth, (int) Math.min( sliceHeight, totalSize - currPos ));
+				currPage = Bitmap.createBitmap(screenshot, 0, currPos, 850, screenshotHeight);//fixed width for css
 								
             	// save page as png
             	stream = new FileOutputStream( new File(dir, "pdf-page-"+currPageCount+".png") );
             	currPage.compress(Bitmap.CompressFormat.PNG, 100, stream);
-
                 stream.close();
                 
                 // move current position indicator
-            	currPos += sliceHeight;
+            	//currPos += sliceHeight;
+                currPos += screenshotHeight;
             	
             	currPage.recycle();
             }
