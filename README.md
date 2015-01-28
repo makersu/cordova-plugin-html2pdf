@@ -38,6 +38,12 @@ $scope.createAndDisplayPDF = function(filename) {
             }, 200);
 
         }
+...
+$scope.displayPDFFile= function(filepath) {
+            var target = device.platform == 'iOS' ? '_blank' : '_system';
+            var ref = window.open(filepath, target, "EnableViewPortScale=yes,location=no,disallowoverscroll=yes,allowInlineMediaPlayback=yes,toolbarposition=top,transitionstyle=fliphorizontal");
+            return ref;
+        };
 
 ```
 
